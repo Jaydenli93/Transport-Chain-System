@@ -1,0 +1,121 @@
+# 基础配置
+seed: 42
+output_dir: "outputs"
+device: "cuda"
+
+# 模型参数
+model_params:
+  density:
+    dx: 0.5            # 空间离散步长
+    dt: 0.2            # 时间离散步长
+    gamma_rail: 0.3    # 铁路运输衰减系数
+    gamma_sea: 0.5     # 海运衰减系数
+    L: 100.0           # 运输路线长度
+    v_rail: 60.0       # 铁路运输速度
+    v_sea: 30.0        # 海运速度
+  
+  price:
+    zeta: 20.0         # 价格调整系数
+    sigma: 0.01        # 价格波动率
+    base_price_rail: 100.0  # 铁路基础价格
+    base_price_sea: 80.0    # 海运基础价格
+    price_sensitivity: 0.5   # 价格敏感度
+  
+  optimization:
+    alpha: 1.0e-5      # 学习率
+    epsilon: 1.0e-8    # 收敛阈值
+    max_iterations: 1000000  # 最大迭代次数
+    phi_0: 1.0         # 初始势能
+    r_a_rail: 0.1      # 铁路阻力系数
+    r_a_sea: 0.15      # 海运阻力系数
+  
+  jacobian:
+    h: 1.0e-6          # 数值微分步长
+    stability_threshold: 0.0  # 稳定性判断阈值
+
+# 仿真配置
+simulation:
+  total_time: 1000.0   # 总仿真时间
+  dt: 0.1              # 时间步长
+  save_interval: 10    # 保存间隔
+  num_companies:       # 每条链路的公司数
+    rail: 5
+    sea: 3
+  initial_conditions:  # 初始条件
+    q_rail: 100.0
+    q_sea: 80.0
+    rho_rail: 0.5
+    rho_sea: 0.4
+
+# 分岔分析配置
+bifurcation:
+  param_name: "zeta"   # 分岔参数名称
+  param_range: [0.1, 30.0]  # 参数范围
+  num_points: 100      # 分析点数
+  control_parameter: 1.0  # 控制参数
+  max_iter: 1000       # 最大迭代次数
+  tolerance: 1.0e-6    # 收敛容差
+  hopf_analysis:
+    window_size: 50    # 分析窗口大小
+    frequency_threshold: 0.01  # 频率阈值
+    amplitude_threshold: 0.1   # 振幅阈值
+
+# 强化学习环境配置
+environment:
+  max_steps: 1000      # 每个回合最大步数
+  reward_scale: 1.0    # 奖励缩放因子
+  time_penalty: 0.1    # 时间惩罚
+  disruption_prob: 0.05  # 随机扰动概率
+  observation_noise: 0.01  # 观测噪声水平
+  state_space:         # 状态空间配置
+    include_density: true
+    include_price: true
+    history_length: 5
+  action_space:        # 动作空间配置
+    flow_limits: [-1.0, 1.0]
+    price_limits: [-0.5, 0.5]
+
+# 智能体配置
+agent:
+  learning_rate: 3.0e-4  # 学习率
+  batch_size: 128      # 批次大小
+  gamma: 0.99          # 折扣因子
+  tau: 0.005           # 目标网络软更新系数
+  policy_noise: 0.2    # 策略噪声
+  noise_clip: 0.5      # 噪声裁剪
+  policy_delay: 2      # 策略更新延迟
+  hidden_dim: 256      # 隐藏层维度
+  buffer_size: 1000000  # 经验回放缓冲区大小
+
+# 训练配置
+training:
+  total_steps: 1000000  # 总训练步数
+  eval_interval: 5000   # 评估间隔
+  save_interval: 10000  # 保存间隔
+  log_dir: "logs"      # 日志目录
+  save_dir: "models"   # 模型保存目录
+  random_seed: 42      # 随机种子
+  num_eval_episodes: 10  # 评估回合数
+  checkpoint:          # 检查点配置
+    enabled: true
+    interval: 50000
+    keep_last: 5
+
+# 评估配置
+eval:
+  num_episodes: 100    # 评估回合数
+  render: false        # 是否渲染
+  save_trajectory: true  # 是否保存轨迹
+  metrics:             # 评估指标
+    - "average_reward"
+    - "success_rate"
+    - "average_length"
+    - "stability_score"
+
+# 日志配置
+logging:
+  level: "INFO"
+  save_format: "json"
+  include_timestamp: true
+  metrics_history: true
+  console_output: true
